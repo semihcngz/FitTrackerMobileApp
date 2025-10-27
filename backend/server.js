@@ -1,19 +1,13 @@
-// backend/server.js
-const express = require('express');
-const cors = require('cors');
-const app = express();
-const PORT = 3000;
+const express = require('express')
 
-// Middleware
-app.use(cors());
-app.use(express.json());
+const app = express()
 
-// Test endpoint
-app.get('/', (req, res) => {
-  res.json({ message: 'FitTrack API çalışıyor!' });
-});
+const authRoutes = require('./routes/auth')
 
-// Sunucuyu başlat
+const PORT = 8080
+
+app.use('./auth', authRoutes)
+
 app.listen(PORT, () => {
-  console.log(`Server http://localhost:${PORT} adresinde çalışıyor`);
-});
+  console.log(`Server: http://localhost:${PORT}`)
+})

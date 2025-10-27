@@ -1,0 +1,51 @@
+import 'package:flutter/foundation.dart';
+import 'package:dio/dio.dart';
+import 'api_client.dart';
+import 'secure_store.dart';
+
+enum AuthStatus { loading, authed, guest }
+
+class AuthService extends ChangeNotifier {
+  AuthStatus status = AuthStatus.loading;
+  Map<String, dynamic>? me;
+
+  bool get isAuthed => status == AuthStatus.authed;
+
+  Future<void> bootstrap() async {
+    final token = await SecureStore.getToken();
+    if (token == null) { status = AuthStatus.guest; notifyListeners(); return; }
+    await fetchMe();
+  }
+
+  Future<String?> login(String email, String password) async {
+    try {
+      final res = await api.post('/auth/login', data: {'email': email, 'password': password});
+      await SecureStore.setToken(res.data['accessToken']);
+      await fetchMe();
+      return null;
+    } on DioException catch (e) {
+      return e.response?.data?['message']?.toString() ?? 'Login failed';
+    }
+  }
+
+  Future<String?> register(String name, String email, String password) async {
+    try {
+      await api.post('/auth/register', data: {'name': name, 'email': email, 'password': password});
+      return await login(email, password);
+    } on DioException catch (e) {
+      return e.response?.data?['message']?.toString() ?? 'Register failed';
+    }
+  }
+
+  Future<void> fetchMe() async {
+    try {
+      final res = await api.get('/auth/me');
+      me = res.data; status = AuthStatus.authed; notifyListeners();
+    } catch (_) { status = AuthStatus.guest; notifyListeners(); }
+  }
+
+  Future<void> logout() async {
+    await SecureStore.clear();
+    me = null; status = AuthStatus.guest; notifyListeners();
+  }
+}

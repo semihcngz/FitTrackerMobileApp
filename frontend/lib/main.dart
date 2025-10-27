@@ -1,70 +1,60 @@
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
+import 'package:provider/provider.dart';
+import 'services/auth_service.dart';
+import 'screens/auth/login_screen.dart';
+import 'screens/home/home_shell.dart';
 
 void main() {
-  runApp(MyApp());
+  runApp(const App());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
+class App extends StatelessWidget {
+  const App({super.key});
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'FitTrack',
-      theme: ThemeData(primarySwatch: Colors.blue),
-      home: HomePage(),
+    final dark = ThemeData(
+      brightness: Brightness.dark,
+      scaffoldBackgroundColor: const Color(0xFF0E0F12),
+      colorScheme: const ColorScheme.dark(
+        primary: Color(0xFF9AA0FF),
+        secondary: Color(0xFF9AA0FF),
+        surface: Color(0xFF14161A),
+      ),
+      cardTheme: const CardThemeData(
+        color: Color(0xFF14161A),
+        elevation: 0,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(16))),
+      ),
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: const Color(0xFF191C20),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+      ),
+      appBarTheme: const AppBarTheme(backgroundColor: Color(0xFF0E0F12), elevation: 0),
     );
-  }
-}
 
-class HomePage extends StatefulWidget {
-  const HomePage({super.key});
-
-  @override
-  _HomePageState createState() => _HomePageState();
-}
-
-class _HomePageState extends State<HomePage> {
-  String message = 'Yükleniyor...';
-
-  @override
-  void initState() {
-    super.initState();
-    testAPI();
-  }
-
-  // API'yi test et
-  Future<void> testAPI() async {
-    try {
-      final response = await http.get(
-        Uri.parse('http://localhost:3000/'),
-      );
-      
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        setState(() {
-          message = data['message'];
-        });
-      }
-    } catch (e) {
-      setState(() {
-        message = 'Hata: $e';
-      });
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text('FitTrack')),
-      body: Center(
-        child: Text(
-          message,
-          style: TextStyle(fontSize: 24),
-        ),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => AuthService()..bootstrap()),
+      ],
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        title: 'HealthFit',
+        theme: dark,
+        home: const _Root(),
       ),
     );
+  }
+}
+
+class _Root extends StatelessWidget {
+  const _Root({super.key});
+  @override
+  Widget build(BuildContext context) {
+    final auth = context.watch<AuthService>();
+    if (auth.status == AuthStatus.loading) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+    return auth.isAuthed ? const HomeShell() : const LoginScreen();
   }
 }
