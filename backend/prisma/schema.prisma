@@ -1,0 +1,64 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int       @id @default(autoincrement())
+  name      String
+  email     String    @unique
+  password  String
+  createdAt DateTime  @default(now())
+  waterLogs     WaterLog[]
+  stepLogs      StepLog[]
+  exerciseLogs  ExerciseLog[]
+  waterGoals    WaterGoal[]
+  stepGoals     StepGoal[]
+}
+
+model WaterLog {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  glasses   Int
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model WaterGoal {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  goal      Int
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model StepLog {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  steps     Int
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model StepGoal {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  goal      Int
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model ExerciseLog {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  type      String   // Cardio | Strength | Flexibility
+  activity  String
+  minutes   Int
+  calories  Int
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
