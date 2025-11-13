@@ -70,8 +70,8 @@ class _HomeScreenState extends State<HomeScreen> {
               Expanded(child: StatCard(
                 title: 'Exercise',
                 topRightIcon: '🏋️',
-                mainValue: '${sum!['exercise']['count']}',
-                subtitle: 'activities',
+                mainValue: '${sum!['exercise']['calories']}',
+                subtitle: ' / kcal burned',
                 percent: (sum!['exercise']['percent'] as num).toDouble(),
               )),
             ]),
