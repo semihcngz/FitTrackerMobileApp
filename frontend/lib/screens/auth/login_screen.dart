@@ -17,7 +17,7 @@ class _LoginScreenState extends State<LoginScreen> {
         const SizedBox(height: 8),
         if (err!=null) Text(err!, style: const TextStyle(color: Colors.red)),
         FilledButton(
-          onPressed: () async { setState(()=>loading=true); final e = await auth.login(email.text.trim(), pass.text.trim()); setState((){err=e; loading=false;}); },
+          onPressed: () async { setState(()=>loading=true); try { await auth.login(email: email.text.trim(), password: pass.text.trim()); setState((){err=null; loading=false;}); } catch(e) { setState((){err=e.toString(); loading=false;}); } },
           child: loading ? const SizedBox(height:18,width:18,child:CircularProgressIndicator(strokeWidth:2)) : const Text('Sign In'),
         ),
         TextButton(onPressed: ()=>Navigator.push(context, MaterialPageRoute(builder: (_)=>const RegisterScreen())), child: const Text('Sign Up')),

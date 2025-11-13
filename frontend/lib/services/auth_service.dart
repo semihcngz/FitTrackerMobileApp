@@ -1,38 +1,89 @@
+// lib/services/auth_service.dart
 import 'package:flutter/foundation.dart';
+import 'api_client.dart';
+import 'secure_store.dart';
 
-enum AuthStatus { loading, authed, guest }
+enum AuthStatus {
+  loading,
+  authenticated,
+  unauthenticated,
+}
 
 class AuthService extends ChangeNotifier {
-  AuthStatus status = AuthStatus.loading;
-  Map<String, dynamic>? me;
+  final _api = ApiClient.instance;
+  final _store = SecureStore();
+  
+  AuthStatus _status = AuthStatus.loading;
+  Map<String, dynamic>? _user;
 
-  bool get isAuthed => status == AuthStatus.authed;
+  AuthStatus get status => _status;
+  bool get isAuthed => _status == AuthStatus.authenticated;
+  Map<String, dynamic>? get user => _user;
 
   Future<void> bootstrap() async {
-    // uygulama ilk açıldığında direkt guest moda geçsin
-    await Future.delayed(const Duration(milliseconds: 500));
-    status = AuthStatus.guest;
+    try {
+      final user = await me();
+      if (user != null) {
+        _user = user;
+        _status = AuthStatus.authenticated;
+      } else {
+        _status = AuthStatus.unauthenticated;
+      }
+    } catch (e) {
+      _status = AuthStatus.unauthenticated;
+    }
     notifyListeners();
   }
 
-  Future<String?> login(String email, String password) async {
-    // sahte login: hiçbir kontrol yok, direkt başarılı say
-    await Future.delayed(const Duration(milliseconds: 300));
-    me = {'name': 'Semih', 'email': email};
-    status = AuthStatus.authed;
+  Future<Map<String, dynamic>> register({
+    required String name,
+    required String email,
+    required String password,
+  }) async {
+    final res = await _api.postJson('/api/auth/register', {
+      'name': name,
+      'email': email,
+      'password': password,
+    });
+    final token = res['token'] as String?;
+    if (token != null) await _store.setToken(token);
+    _user = res['user'] as Map<String, dynamic>?;
+    _status = AuthStatus.authenticated;
     notifyListeners();
-    return null;
+    return {
+      'user': res['user'],
+      'token': token,
+    };
   }
 
-  Future<String?> register(String name, String email, String password) async {
-    // sahte kayıt: sadece login'e yönlendiriyor
-    await Future.delayed(const Duration(milliseconds: 300));
-    return login(email, password);
+  Future<Map<String, dynamic>> login({
+    required String email,
+    required String password,
+  }) async {
+    final res = await _api.postJson('/api/auth/login', {
+      'email': email,
+      'password': password,
+    });
+    final token = res['token'] as String?;
+    if (token != null) await _store.setToken(token);
+    _user = res['user'] as Map<String, dynamic>?;
+    _status = AuthStatus.authenticated;
+    notifyListeners();
+    return {
+      'user': res['user'],
+      'token': token,
+    };
+  }
+
+  Future<Map<String, dynamic>?> me() async {
+    final res = await _api.getJson('/api/auth/me');
+    return res['user'] as Map<String, dynamic>?;
   }
 
   Future<void> logout() async {
-    me = null;
-    status = AuthStatus.guest;
+    await _store.clearToken();
+    _user = null;
+    _status = AuthStatus.unauthenticated;
     notifyListeners();
   }
 }

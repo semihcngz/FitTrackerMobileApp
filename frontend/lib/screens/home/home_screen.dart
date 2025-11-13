@@ -12,6 +12,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  final dataService = DataService();
   Map<String, dynamic>? sum;
   bool loading = true;
 
@@ -28,7 +29,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final me = context.watch<AuthService>().me;
+    final me = context.watch<AuthService>().user;
     final date = DateFormat('EEEE, MMMM d, yyyy').format(DateTime.now());
 
     return RefreshIndicator(

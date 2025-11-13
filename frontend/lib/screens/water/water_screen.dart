@@ -8,6 +8,7 @@ class WaterScreen extends StatefulWidget {
 }
 
 class _WaterScreenState extends State<WaterScreen> {
+  final dataService = DataService();
   Map<String, dynamic>? w;
   bool loading = true;
   final goalCtrl = TextEditingController();
@@ -42,7 +43,7 @@ class _WaterScreenState extends State<WaterScreen> {
                 Text('Stay hydrated throughout the day', style: TextStyle(color: Colors.grey.shade400)),
                 const SizedBox(height: 16),
                 Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-                  IconButton(onPressed: () async { await dataService.addWater(-1); await _load(); }, icon: const Icon(Icons.remove_circle_outline, size: 28)),
+                  IconButton(onPressed: () async { await dataService.addWater(glasses: -1); await _load(); }, icon: const Icon(Icons.remove_circle_outline, size: 28)),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 24),
                     child: Column(children: [
@@ -50,7 +51,7 @@ class _WaterScreenState extends State<WaterScreen> {
                       const Text('glasses')
                     ]),
                   ),
-                  IconButton(onPressed: () async { await dataService.addWater(1); await _load(); }, icon: const Icon(Icons.add_circle_outline, size: 28)),
+                  IconButton(onPressed: () async { await dataService.addWater(glasses: 1); await _load(); }, icon: const Icon(Icons.add_circle_outline, size: 28)),
                 ]),
                 const SizedBox(height: 16),
                 LinearProgressIndicator(value: percent, minHeight: 8, borderRadius: BorderRadius.circular(8)),

@@ -1,9 +1,0 @@
-{
-    "dashboard": {
-      "water": {"count": 3, "goal": 8, "percent": 0.37},
-      "steps": {"count": 4500, "goal": 10000, "percent": 0.45},
-      "exercise": {"count": 1, "minutes": 30, "percent": 0.25},
-      "overall": 0.36
-    }
-  }
-  

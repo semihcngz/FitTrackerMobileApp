@@ -18,7 +18,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         const SizedBox(height: 8),
         if (err!=null) Text(err!, style: const TextStyle(color: Colors.red)),
         FilledButton(
-          onPressed: () async { setState(()=>loading=true); final e = await auth.register(name.text.trim(), email.text.trim(), pass.text.trim()); setState((){err=e; loading=false;}); if(e==null && mounted) Navigator.pop(context); },
+          onPressed: () async { setState(()=>loading=true); try { await auth.register(name: name.text.trim(), email: email.text.trim(), password: pass.text.trim()); setState((){err=null; loading=false;}); if(mounted) Navigator.pop(context); } catch(e) { setState((){err=e.toString(); loading=false;}); } },
           child: loading ? const SizedBox(height:18,width:18,child:CircularProgressIndicator(strokeWidth:2)) : const Text('Create Account'),
         ),
       ]),

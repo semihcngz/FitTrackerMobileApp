@@ -8,6 +8,7 @@ class ExerciseScreen extends StatefulWidget {
 }
 
 class _ExerciseScreenState extends State<ExerciseScreen> {
+  final dataService = DataService();
   Map<String, dynamic>? e; bool loading = true;
   final types = const ['Cardio', 'Strength', 'Flexibility'];
   String type = 'Cardio'; String? activity;
@@ -83,24 +84,6 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
             ),
           ),
           const SizedBox(height: 16),
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                const Row(children: [Icon(Icons.sports_gymnastics), SizedBox(width: 8), Text("Today's Activities", style: TextStyle(fontWeight: FontWeight.w600))]),
-                const SizedBox(height: 12),
-                if (list.isEmpty) Text('0 activities logged', style: TextStyle(color: Colors.grey.shade400)),
-                for (final a in list) Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 6),
-                  child: Row(children: [
-                    const Icon(Icons.check_circle_outline, size: 18),
-                    const SizedBox(width: 8),
-                    Text('${a['activity']} · ${a['minutes']}m · ${a['calories']} kcal'),
-                  ]),
-                ),
-              ]),
-            ),
-          ),
         ],
       ),
     );
