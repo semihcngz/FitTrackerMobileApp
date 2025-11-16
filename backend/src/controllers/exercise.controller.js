@@ -2,31 +2,12 @@ import { query } from '../config/database.js';
 
 const getCurrentDay = () => new Date().toISOString().slice(0, 10);
 
-// Exercises tablosunu oluştur (ilk kullanımda)
-const ensureExercisesTable = async () => {
-  try {
-    await query(`
-      CREATE TABLE IF NOT EXISTS exercises (
-        id SERIAL PRIMARY KEY,
-        user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-        day DATE NOT NULL,
-        type VARCHAR(50) NOT NULL,
-        activity VARCHAR(100) NOT NULL,
-        minutes INTEGER NOT NULL,
-        calories INTEGER NOT NULL,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      )
-    `);
-    await query('CREATE INDEX IF NOT EXISTS idx_exercises_user_day ON exercises(user_id, day)');
-  } catch (error) {
-    // Tablo zaten varsa hata göz ardı edilir
-  }
-};
+
 
 export const getToday = async (req, res, next) => {
   try {
     const day = getCurrentDay();
-    
+
     // Toplam veriyi çek
     const { rows } = await query(
       'SELECT minutes, calories, goal FROM exercise_logs WHERE user_id=$1 AND day=$2',
@@ -34,6 +15,9 @@ export const getToday = async (req, res, next) => {
     );
     const data = rows[0] || { minutes: 0, calories: 0, goal: 30 };
 
+
+
+    
     // Detaylı egzersiz listesini çek
     let exercisesList = [];
     try {
@@ -71,8 +55,6 @@ export const addExercise = async (req, res, next) => {
     const exType = type || 'Cardio';
     const exActivity = activity || 'Exercise';
 
-    // Tablo kontrolü
-    await ensureExercisesTable();
 
     // Detaylı egzersiz kaydı ekle
     await query(
@@ -111,35 +93,3 @@ export const addExercise = async (req, res, next) => {
   }
 };
 
-export const setGoal = async (req, res, next) => {
-  try {
-    const { goal } = req.body;
-    const newGoal = Number.isInteger(goal) && goal > 0 ? goal : 30;
-    const day = getCurrentDay();
-
-    const { rows: existing } = await query(
-      'SELECT id FROM exercise_logs WHERE user_id=$1 AND day=$2',
-      [req.user.id, day]
-    );
-
-    let result;
-
-    if (!existing.length) {
-      const { rows } = await query(
-        'INSERT INTO exercise_logs (user_id, day, minutes, calories, goal) VALUES ($1,$2,$3,$4,$5) RETURNING minutes, calories, goal',
-        [req.user.id, day, 0, 0, newGoal]
-      );
-      result = rows[0];
-    } else {
-      const { rows } = await query(
-        'UPDATE exercise_logs SET goal=$1 WHERE id=$2 RETURNING minutes, calories, goal',
-        [newGoal, existing[0].id]
-      );
-      result = rows[0];
-    }
-
-    res.json(result);
-  } catch (error) {
-    next(error);
-  }
-};

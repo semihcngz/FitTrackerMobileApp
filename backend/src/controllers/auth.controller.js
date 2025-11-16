@@ -7,9 +7,6 @@ export const register = async (req, res, next) => {
   try {
     const { name, email, password } = req.body;
 
-    // Validasyon
-    validateRequired(['name', 'email', 'password'], req.body);
-
     if (!validateEmail(email)) {
       return res.status(400).json({ error: 'Invalid email format' });
     }

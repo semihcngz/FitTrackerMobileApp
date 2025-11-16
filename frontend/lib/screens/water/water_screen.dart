@@ -86,14 +86,7 @@ class _WaterScreenState extends State<WaterScreen> {
               ]),
             ),
           ),
-          const SizedBox(height: 16),
-          Row(children: [
-            Expanded(child: _slotCard('Morning', 'Target: 3 glasses')),
-            const SizedBox(width: 12),
-            Expanded(child: _slotCard('Afternoon', 'Target: 4 glasses')),
-            const SizedBox(width: 12),
-            Expanded(child: _slotCard('Evening', 'Target: 3 glasses')),
-          ])
+          
         ],
       ),
     );

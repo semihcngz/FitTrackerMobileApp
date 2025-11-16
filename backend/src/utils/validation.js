@@ -1,7 +1,7 @@
 export const validateEmail = (email) => {
-    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return re.test(email);
-  };
+  return email && email.includes('@') && email.includes('.');
+};
+
   
   export const validatePassword = (password) => {
     return password && password.length >= 6;

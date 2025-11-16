@@ -1,5 +1,10 @@
 import { query } from '../config/database.js';
 
+
+// ana ekranda gosterilecek ozet bilgileri saklar
+
+
+// Bugünün tarihini YYYY-MM-DD formatında döner
 const getCurrentDay = () => new Date().toISOString().slice(0, 10);
 
 export const getTodayStats = async (req, res, next) => {
@@ -7,7 +12,7 @@ export const getTodayStats = async (req, res, next) => {
     const day = getCurrentDay();
 
     // Tüm verileri paralel olarak çek
-    const [water, steps, exercise] = await Promise.all([
+    const [water, steps, exercise] = await Promise.all([  // Promise.all 3 sorguyu ayni anda calistirir
       query('SELECT count, goal FROM water_logs WHERE user_id=$1 AND day=$2', [req.user.id, day]),
       query('SELECT steps, goal FROM step_logs WHERE user_id=$1 AND day=$2', [req.user.id, day]),
       query('SELECT minutes, calories, goal FROM exercise_logs WHERE user_id=$1 AND day=$2', [req.user.id, day])
@@ -28,7 +33,7 @@ export const getTodayStats = async (req, res, next) => {
     const stepsBlock = {
       count: s.steps,
       goal: s.goal,
-      percent: s.goal ? s.steps / s.goal : 0
+      percent: s.goal ? s.steps / s.goal : 0 // eger goal 0 ise hata vermesin diye
     };
 
     const exerciseBlock = {

@@ -56,7 +56,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 topRightIcon: '💧',
                 mainValue: '${sum!['water']['count']}',
                 subtitle: '/ ${sum!['water']['goal']} glasses',
-                percent: (sum!['water']['percent'] as num).toDouble(),
+                percent: (sum!['water']['percent'] as num).toDouble().clamp(0.0, 1.0), // ← .clamp(0.0, 1.0) EKLE
               )),
               const SizedBox(width: 12),
               Expanded(child: StatCard(
@@ -64,7 +64,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 topRightIcon: '🦶',
                 mainValue: '${sum!['steps']['count']}',
                 subtitle: '/ ${sum!['steps']['goal']}',
-                percent: (sum!['steps']['percent'] as num).toDouble(),
+                percent: (sum!['steps']['percent'] as num).toDouble().clamp(0.0, 1.0), // ← .clamp(0.0, 1.0) EKLE
               )),
               const SizedBox(width: 12),
               Expanded(child: StatCard(
@@ -72,9 +72,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 topRightIcon: '🏋️',
                 mainValue: '${sum!['exercise']['calories']}',
                 subtitle: ' / kcal burned',
-                percent: (sum!['exercise']['percent'] as num).toDouble(),
+                percent: (sum!['exercise']['percent'] as num).toDouble().clamp(0.0, 1.0), // ← .clamp(0.0, 1.0) EKLE
               )),
-            ]),
+          ]),
             const SizedBox(height: 16),
             Card(
               child: Padding(
