@@ -64,6 +64,7 @@ class AuthService extends ChangeNotifier {
       'email': email,
       'password': password,
     });
+    // tokeni kaydet
     final token = res['token'] as String?;
     if (token != null) await _store.setToken(token);
     _user = res['user'] as Map<String, dynamic>?;

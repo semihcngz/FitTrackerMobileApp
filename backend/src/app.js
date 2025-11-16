@@ -36,7 +36,7 @@ app.use('/api/steps', stepsRoutes);
 app.use('/api/exercise', exerciseRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 
-// Error handling middleware (en sonda olmalı)
+// Error handling middleware
 app.use(errorHandler);
 
 export default app;

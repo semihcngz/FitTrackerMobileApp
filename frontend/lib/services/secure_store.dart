@@ -1,6 +1,10 @@
 // lib/services/secure_store.dart
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
+// stores JWT token
+// apiclient tarafindan tokenlari requeste eklemek icin kullanilir
+
+
 class SecureStore {
   static const _kTokenKey = 'auth_token';
   final FlutterSecureStorage _storage = const FlutterSecureStorage();
