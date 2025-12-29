@@ -40,6 +40,13 @@ class ApiClient {
     return headers;
   }
 
+  Future<Map> deleteJson(String path) async {
+  final uri = Uri.parse('${ApiConfig.baseUrl}$path');
+  final headers = await _authHeaders();
+  final res = await http.delete(uri, headers: headers);
+  return _handleResponse(res);
+  }
+
   Map<String, dynamic> _handleResponse(http.Response res) {
     final data = res.body.isEmpty ? {} : jsonDecode(res.body);
     if (res.statusCode >= 200 && res.statusCode < 300) {

@@ -9,6 +9,7 @@ import stepsRoutes from './routes/steps.routes.js';
 import exerciseRoutes from './routes/exercise.routes.js';
 import dashboardRoutes from './routes/dashboard.routes.js';
 import profileRoutes from './routes/profile.routes.js';
+import foodRoutes from './routes/food.routes.js';
 
 // Middleware
 import { errorHandler } from './middleware/error.middleware.js';
@@ -17,7 +18,8 @@ const app = express();
 
 // Middleware
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ limit: '10mb', extended: true }));
 app.use(morgan('dev'));
 
 // Health check
@@ -37,6 +39,7 @@ app.use('/api/steps', stepsRoutes);
 app.use('/api/exercise', exerciseRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/profile', profileRoutes);
+app.use('/api/food', foodRoutes);
 
 // Error handling middleware
 app.use(errorHandler);

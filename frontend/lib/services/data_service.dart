@@ -53,4 +53,26 @@ class DataService {
     });
     return res; // {minutes, calories, list: [...]}
   }
+
+  Future<Map<String, dynamic>> getExerciseWeeklyStats({int weekOffset = 0}) async {
+    final res = await _api.getJson('/api/exercise/stats/weekly?week_offset=$weekOffset');
+    return res;
+  }
+
+  Future<Map> analyzeFood(String imageBase64, {String? mealType}) async {
+  final res = await _api.postJson('/api/food/analyze', {
+    'image_base64': imageBase64,
+    'meal_type': mealType,
+  });
+  return res;
+}
+
+Future<Map> getTodayFood() async {
+  final res = await _api.getJson('/api/food/today');
+  return res;
+}
+
+Future deleteFood(int id) async {
+  await _api.deleteJson('/api/food/$id');
+}
 }

@@ -1,21 +1,22 @@
 import 'package:flutter/material.dart';
 import '../../services/data_service.dart';
+import 'exercise_stats_screen.dart'; // ← YENİ IMPORT
 
 class ExerciseScreen extends StatefulWidget {
   const ExerciseScreen({super.key});
   @override
-  State<ExerciseScreen> createState() => _ExerciseScreenState();
+  State createState() => _ExerciseScreenState();
 }
 
-class _ExerciseScreenState extends State<ExerciseScreen> {
+class _ExerciseScreenState extends State {
   final dataService = DataService();
-  Map<String, dynamic>? e; bool loading = true;
+  Map? e; bool loading = true;
   final types = const ['Cardio', 'Strength', 'Flexibility'];
   String type = 'Cardio'; String? activity;
   final minutesCtrl = TextEditingController(text: '30');
   final calCtrl = TextEditingController(text: '200');
 
-  List<String> _getActivitiesForType(String exerciseType) {
+  List _getActivitiesForType(String exerciseType) {
     switch (exerciseType) {
       case 'Cardio':
         return ['Running', 'Cycling', 'Jump Rope'];
@@ -28,7 +29,7 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
     }
   }
 
-  Future<void> _load() async { e = await dataService.getExerciseToday(); setState(() => loading = false); }
+  Future _load() async { e = await dataService.getExerciseToday(); setState(() => loading = false); }
 
   @override void initState() { super.initState(); _load(); }
 
@@ -36,9 +37,24 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
   Widget build(BuildContext context) {
     final time = e?['minutes'] ?? 0;
     final cal = e?['calories'] ?? 0;
-    final exercisesList = (e?['list'] as List<dynamic>? ?? []);
+    final exercisesList = (e?['list'] as List? ?? []);
     return Scaffold(
-      appBar: AppBar(title: const Text('Exercise Tracker')),
+      appBar: AppBar(
+        title: const Text('Exercise Tracker'),
+        actions: [
+          // ← YENİ: İstatistik Butonu
+          IconButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const ExerciseStatsScreen()),
+              );
+            },
+            icon: const Icon(Icons.bar_chart),
+            tooltip: 'Statistics',
+          ),
+        ],
+      ),
       body: loading ? const Center(child: CircularProgressIndicator()) : ListView(
         padding: const EdgeInsets.all(16),
         children: [
@@ -54,13 +70,12 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
               child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                 const Row(children: [Icon(Icons.add), SizedBox(width: 8), Text('Add Exercise', style: TextStyle(fontWeight: FontWeight.w600))]),
                 const SizedBox(height: 12),
-                DropdownButtonFormField<String>(
+                DropdownButtonFormField(
                   value: type,
                   items: types.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
                   onChanged: (v) {
                     setState(() {
                       type = v!;
-                      // Reset activity when type changes
                       final availableActivities = _getActivitiesForType(type);
                       if (activity == null || !availableActivities.contains(activity)) {
                         activity = null;
@@ -70,11 +85,11 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
                   decoration: const InputDecoration(labelText: 'Exercise Type'),
                 ),
                 const SizedBox(height: 8),
-                DropdownButtonFormField<String>(
+                DropdownButtonFormField(
                   value: activity,
                   items: _getActivitiesForType(type)
                       .map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
-                  onChanged: (v) => setState(() => activity = v),
+                  onChanged: (v) => setState(() => activity = v as String?),
                   decoration: const InputDecoration(labelText: 'Activity'),
                 ),
                 const SizedBox(height: 8),
@@ -93,7 +108,6 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
                       minutes: int.tryParse(minutesCtrl.text) ?? 0,
                       calories: int.tryParse(calCtrl.text) ?? 0,
                     );
-                    // Reset form after adding exercise
                     setState(() {
                       activity = null;
                       minutesCtrl.text = '30';

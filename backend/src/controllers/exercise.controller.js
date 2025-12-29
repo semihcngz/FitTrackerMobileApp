@@ -116,14 +116,14 @@ export const getWeeklyStats = async (req, res, next) => {
 
     // 7 günün verilerini çek
     const { rows } = await query(
-      `SELECT day, 
+      `SELECT day::date as day, 
               COALESCE(SUM(minutes), 0) as total_minutes, 
               COALESCE(SUM(calories), 0) as total_calories,
               COUNT(*) as exercise_count
        FROM exercises 
-       WHERE user_id=$1 AND day >= $2 AND day <= $3
-       GROUP BY day
-       ORDER BY day`,
+       WHERE user_id=$1 AND day::date >= $2::date AND day::date <= $3::date
+       GROUP BY day::date
+       ORDER BY day::date`,
       [req.user.id, startDate, endDate]
     );
 
@@ -134,7 +134,19 @@ export const getWeeklyStats = async (req, res, next) => {
       currentDate.setDate(startOfWeek.getDate() + i);
       const dateStr = currentDate.toISOString().slice(0, 10);
       
-      const dayData = rows.find(r => r.day === dateStr);
+      // Convert day from Date/timestamp to string for comparison
+      const dayData = rows.find(r => {
+        let rowDay;
+        if (r.day instanceof Date) {
+          rowDay = r.day.toISOString().slice(0, 10);
+        } else if (typeof r.day === 'string') {
+          rowDay = r.day.slice(0, 10);
+        } else {
+          // Handle other types (like moment objects or timestamps)
+          rowDay = new Date(r.day).toISOString().slice(0, 10);
+        }
+        return rowDay === dateStr;
+      });
       
       weekData.push({
         date: dateStr,
