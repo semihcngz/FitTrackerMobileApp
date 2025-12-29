@@ -1,0 +1,41 @@
+users
+        id 
+        name
+        email
+        password_hash
+        created_at
+
+water_logs 
+        id 
+        user_id 
+        day
+        count
+        goal
+      
+
+step_logs 
+        id
+        user_id 
+        day
+        steps
+        goal
+
+
+exercise_logs
+        id 
+        user_id 
+        day
+        minutes
+        calories
+        goal
+
+
+exercises 
+        id
+        user_id
+        day
+        type
+        activity
+        minutes
+        calories
+        created_at 

@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../../services/auth_service.dart';
 import '../../services/data_service.dart';
 import '../../widgets/stat_card.dart';
+import '../profile/profile_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -37,15 +38,53 @@ class _HomeScreenState extends State<HomeScreen> {
       child: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-            Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text('Welcome back,', style: TextStyle(color: Colors.grey.shade400)),
-              Text(me?['name'] ?? 'User', style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w700)),
-              const SizedBox(height: 4),
-              Text(date, style: TextStyle(color: Colors.grey.shade500)),
-            ]),
-            TextButton.icon(onPressed: () => context.read<AuthService>().logout(), icon: const Icon(Icons.person), label: const Text('Sign Out')),
-          ]),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              // Sol taraf: Kullanıcı bilgileri - Expanded ile sınırla
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Welcome back,', style: TextStyle(color: Colors.grey.shade400)),
+                    Text(
+                      me?['name'] ?? 'User',
+                      style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w700),
+                      overflow: TextOverflow.ellipsis, // Uzun isimler için
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      date,
+                      style: TextStyle(color: Colors.grey.shade500, fontSize: 12),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
+              ),
+              // Sağ taraf: Profil ve Sign Out butonları
+              Row(
+                mainAxisSize: MainAxisSize.min, // Minimum alan kapla
+                children: [
+                  IconButton(
+                    onPressed: () async {
+                      await Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const ProfileScreen()),
+                      );
+                      _load();
+                    },
+                    icon: const Icon(Icons.person_outline),
+                    tooltip: 'Profile',
+                  ),
+                  IconButton(
+                    onPressed: () => context.read<AuthService>().logout(),
+                    icon: const Icon(Icons.logout),
+                    tooltip: 'Sign Out',
+                  ),
+                ],
+              ),
+            ],
+          ),
           const SizedBox(height: 16),
           if (loading) const LinearProgressIndicator(),
           if (!loading && sum != null) ...[
@@ -56,7 +95,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 topRightIcon: '💧',
                 mainValue: '${sum!['water']['count']}',
                 subtitle: '/ ${sum!['water']['goal']} glasses',
-                percent: (sum!['water']['percent'] as num).toDouble().clamp(0.0, 1.0), // ← .clamp(0.0, 1.0) EKLE
+                percent: (sum!['water']['percent'] as num).toDouble().clamp(0.0, 1.0),
               )),
               const SizedBox(width: 12),
               Expanded(child: StatCard(
@@ -64,7 +103,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 topRightIcon: '🦶',
                 mainValue: '${sum!['steps']['count']}',
                 subtitle: '/ ${sum!['steps']['goal']}',
-                percent: (sum!['steps']['percent'] as num).toDouble().clamp(0.0, 1.0), // ← .clamp(0.0, 1.0) EKLE
+                percent: (sum!['steps']['percent'] as num).toDouble().clamp(0.0, 1.0),
               )),
               const SizedBox(width: 12),
               Expanded(child: StatCard(
@@ -72,9 +111,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 topRightIcon: '🏋️',
                 mainValue: '${sum!['exercise']['calories']}',
                 subtitle: ' / kcal burned',
-                percent: (sum!['exercise']['percent'] as num).toDouble().clamp(0.0, 1.0), // ← .clamp(0.0, 1.0) EKLE
+                percent: (sum!['exercise']['percent'] as num).toDouble().clamp(0.0, 1.0),
               )),
-          ]),
+            ]),
             const SizedBox(height: 16),
             Card(
               child: Padding(
@@ -92,7 +131,11 @@ class _HomeScreenState extends State<HomeScreen> {
                     Text('${((sum!['overall'] as num).toDouble() * 100).toStringAsFixed(0)}%'),
                   ]),
                   const SizedBox(height: 8),
-                  LinearProgressIndicator(value: (sum!['overall'] as num).toDouble(), minHeight: 8, borderRadius: BorderRadius.circular(8)),
+                  LinearProgressIndicator(
+                    value: (sum!['overall'] as num).toDouble().clamp(0.0, 1.0),
+                    minHeight: 8,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
                 ]),
               ),
             ),

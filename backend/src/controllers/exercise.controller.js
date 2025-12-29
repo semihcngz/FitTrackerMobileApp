@@ -93,3 +93,75 @@ export const addExercise = async (req, res, next) => {
   }
 };
 
+export const getWeeklyStats = async (req, res, next) => {
+  try {
+    const { week_offset } = req.query; // 0=bu hafta, 1=geçen hafta, 2=2 hafta önce
+    const offset = parseInt(week_offset) || 0;
+
+    // Haftanın başlangıç ve bitiş tarihlerini hesapla
+    const today = new Date();
+    const dayOfWeek = today.getDay(); // 0=Pazar, 1=Pazartesi, ...
+    const mondayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek; // Pazartesi'ye kadar geri git
+    
+    const startOfWeek = new Date(today);
+    startOfWeek.setDate(today.getDate() + mondayOffset - (offset * 7));
+    startOfWeek.setHours(0, 0, 0, 0);
+    
+    const endOfWeek = new Date(startOfWeek);
+    endOfWeek.setDate(startOfWeek.getDate() + 6);
+    endOfWeek.setHours(23, 59, 59, 999);
+
+    const startDate = startOfWeek.toISOString().slice(0, 10);
+    const endDate = endOfWeek.toISOString().slice(0, 10);
+
+    // 7 günün verilerini çek
+    const { rows } = await query(
+      `SELECT day, 
+              COALESCE(SUM(minutes), 0) as total_minutes, 
+              COALESCE(SUM(calories), 0) as total_calories,
+              COUNT(*) as exercise_count
+       FROM exercises 
+       WHERE user_id=$1 AND day >= $2 AND day <= $3
+       GROUP BY day
+       ORDER BY day`,
+      [req.user.id, startDate, endDate]
+    );
+
+    // 7 günlük array oluştur (boş günler için 0)
+    const weekData = [];
+    for (let i = 0; i < 7; i++) {
+      const currentDate = new Date(startOfWeek);
+      currentDate.setDate(startOfWeek.getDate() + i);
+      const dateStr = currentDate.toISOString().slice(0, 10);
+      
+      const dayData = rows.find(r => r.day === dateStr);
+      
+      weekData.push({
+        date: dateStr,
+        dayName: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][currentDate.getDay()],
+        totalMinutes: dayData ? parseInt(dayData.total_minutes) : 0,
+        totalCalories: dayData ? parseInt(dayData.total_calories) : 0,
+        exerciseCount: dayData ? parseInt(dayData.exercise_count) : 0
+      });
+    }
+
+    // Hafta özeti
+    const weekSummary = {
+      startDate,
+      endDate,
+      totalMinutes: weekData.reduce((sum, day) => sum + day.totalMinutes, 0),
+      totalCalories: weekData.reduce((sum, day) => sum + day.totalCalories, 0),
+      totalExercises: weekData.reduce((sum, day) => sum + day.exerciseCount, 0),
+      avgCaloriesPerDay: Math.round(weekData.reduce((sum, day) => sum + day.totalCalories, 0) / 7),
+      activeDays: weekData.filter(day => day.exerciseCount > 0).length
+    };
+
+    res.json({
+      weekOffset: offset,
+      summary: weekSummary,
+      days: weekData
+    });
+  } catch (error) {
+    next(error);
+  }
+};

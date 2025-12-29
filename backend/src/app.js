@@ -8,6 +8,7 @@ import waterRoutes from './routes/water.routes.js';
 import stepsRoutes from './routes/steps.routes.js';
 import exerciseRoutes from './routes/exercise.routes.js';
 import dashboardRoutes from './routes/dashboard.routes.js';
+import profileRoutes from './routes/profile.routes.js';
 
 // Middleware
 import { errorHandler } from './middleware/error.middleware.js';
@@ -35,6 +36,7 @@ app.use('/api/water', waterRoutes);
 app.use('/api/steps', stepsRoutes);
 app.use('/api/exercise', exerciseRoutes);
 app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/profile', profileRoutes);
 
 // Error handling middleware
 app.use(errorHandler);
